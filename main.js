@@ -4,7 +4,22 @@ const eventDate= document.querySelector('#eventDate');
 const buttonAdd= document.querySelector('#bAdd');
 const eventsContainer = document.querySelector('#eventsContainer');
 
+//Obtenemos la info guardada
+const json = load();
+try{
+    arr=JSON.parse(json);
+}catch(error){
+    arr =[];
+}
+//Si arr es nulo o undefined copiar la info de arr en events y sino events es un arreglo vacio
+events= arr ? [...arr] : [] ;
+
 document.querySelector('form').addEventListener('submit', e =>{
+    e.preventDefault();
+    addEvent();
+});
+
+buttonAdd.addEventListener('click', e =>{
     e.preventDefault();
     addEvent();
 });
@@ -29,6 +44,9 @@ function addEvent(){
     //Agregamos el nuevo evento al inicio del arreglo
     events.unshift(newEvent);
     
+    //GUARDAMOS
+    save(JSON.stringify(events));
+
     //Limpiamos los campos
     eventName.value="";
 
@@ -57,18 +75,35 @@ function renderEvents(){
                 <div class='event-name'>
                     ${event.date}
                 </div>
-                <div class='actions' data-id='${event.id}'>
-                    <button class='Delete'>Eliminar</button>
+                <div class='actions'>
+                    <button data-id='${event.id}' class='bDelete'>Eliminar</button>
                 </div>
             </div>
         `;
 
         
     });
-    //console.log(eventsHTML);
-    eventsContainer.innerHTML = eventsHTML;
+    //Juntamos los elementos del arreglo en una sola cadena
+    eventsContainer.innerHTML = eventsHTML.join();
+    
+    document.querySelectorAll('.bDelete').forEach(button =>{
+        button.addEventListener('click', e => {
+            const id=button.getAttribute('data-id');
+            events = events.filter(event => event.id!=id);
+            save(JSON.stringify(events));
+            renderEvents();
+        });
+    });
 }
 
+///Para guardar 
+function save(data){
+    localStorage.setItem('items', data);
+}
+
+function load(){
+    return localStorage.getItem('items');
+}
 
 /* 
 let x=Math.random()*100;
